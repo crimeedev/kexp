@@ -24,7 +24,7 @@
    ((x & PF_X) ? PROT_EXEC : 0))
 
 typedef struct {
-  uintptr_t dlsym;
+  uintptr_t syscall_wrapper;
   int *rwpipe;
   int *rwpair;
   uintptr_t pipe_f_data;

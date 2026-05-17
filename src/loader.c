@@ -168,8 +168,8 @@ void init_loader_args() {
   if (kread(&rpipe_f_data, rpipe_fp, sizeof(rpipe_f_data)) == -1)
     return;
 
-  void *kernel_dlsym;
-  if (dlsym(LIBKERNEL_HANDLE, "sceKernelDlsym", &kernel_dlsym) == -1)
+  void *kernel_getpid;
+  if (dlsym(LIBKERNEL_HANDLE, "getpid", &kernel_getpid) == -1)
     return;
 
   uint32_t version = get_fw_version();
@@ -178,7 +178,7 @@ void init_loader_args() {
     kernel_data_base -= 0x10000;
   }
 
-  loader_ctx.args.dlsym = kernel_dlsym;
+  loader_ctx.args.syscall_wrapper = kernel_getpid;
   loader_ctx.args.rwpipe = rwpipe;
   loader_ctx.args.rwpair = rwpair;
   loader_ctx.args.pipe_f_data = rpipe_f_data;
@@ -195,12 +195,12 @@ void run_loader() {
 
   pthread_id = *(uint32_t *)pthread;
 
-  notify("Created bin thread with id %i !!", pthread_id);
+  notify("Created elfldr thread with id %i !!", pthread_id);
 
-  if (pthread_join(&pthread, 0))
+  if (pthread_join(pthread, 0))
     return;
 
-  notify("bin returned %#lx !!", *(uint64_t *)loader_ctx.args.ret);
+  notify("elfldr returned %#lx !!", *(uint64_t *)loader_ctx.args.ret);
 
   return;
 
