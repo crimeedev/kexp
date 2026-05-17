@@ -61,7 +61,7 @@
     free(ret_addr)
 ```
 
-# Credit
+# Credits
 Special thanks to:
 - TheFlow
 - Spector
