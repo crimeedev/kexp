@@ -60,3 +60,12 @@
 11. Free return value storage
     free(ret_addr)
 ```
+
+# Credit
+Special thanks to:
+- TheFlow
+- Spector
+- Gezine
+- Cow
+- sb
+- Dr. YenYen
