@@ -229,7 +229,7 @@ int init_loader_args() {
 }
 
 int run_loader() {
-  typedef void (*entry_fn)(loader_args_t*, uint32_t);
+  typedef void (*elfldr_entry)(loader_args_t*, uint32_t);
 
   elfldr_entry entry = loader_ctx.entry;
 
