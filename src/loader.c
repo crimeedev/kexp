@@ -138,16 +138,7 @@ int init_loader_args() {
   }
 
   int master_sock = socket(AF_INET6, SOCK_DGRAM, 0);
-  if (master_sock == -1) {
-    notify("failed to create master socket !!");
-    return -1;
-  }
-
   int victim_sock = socket(AF_INET6, SOCK_DGRAM, 0);
-  if (victim_sock == -1) {
-    notify("failed to create victim socket !!");
-    return -1;
-  }
 
   *(uint32_t *)(loader_ctx.args_map + 0x00) = 0x14;
   *(uint32_t *)(loader_ctx.args_map + 0x04) = IPPROTO_IPV6;
@@ -218,37 +209,27 @@ int init_loader_args() {
   loader_ctx.args.pipe_f_data = rpipe_f_data;
   loader_ctx.args.kernel_text_base = kaddrs.ktext;
   loader_ctx.args.ret = ret_addr;
-  loader_ctx.args.flag = 0x54455854; // 'T','E','X','T'
 
   notify("syscall_wrapper: %#lx\nrwpipe: [%i, %i]\nrwpair: [%i, "
          "%i]\npipe_f_data: %#lx\nkernel_text_base: %#lx\nret: %lx",
-         loader_ctx.args.syscall_wrapper, loader_ctx.args.rwpipe[0],
-         loader_ctx.args.rwpipe[1], loader_ctx.args.rwpair[0],
-         loader_ctx.args.rwpair[1], loader_ctx.args.pipe_f_data,
+         loader_ctx.args.syscall_wrapper, rwpipe[0], rwpipe[1], rwpair[0],
+         rwpair[1], loader_ctx.args.pipe_f_data,
          loader_ctx.args.kernel_text_base, loader_ctx.args.ret);
   return 0;
 }
 
 int run_loader() {
-  typedef void (*elfldr_entry)(loader_args_t* args);
+  typedef int (*entry_fn)(loader_args_t*, uint32_t);
+  entry_fn entry = (entry_fn)loader_ctx.entry;
 
-  elfldr_entry entry = loader_ctx.entry;
+  notify("Calling elfldr entry at %#lx", loader_ctx.entry);
+  
+  int result = entry(&loader_ctx.args, 0x54455854u); // TEXT
 
-  notify("running elfldr...");
-
-  entry(&loader_ctx.args);
-
-  notify("elfldr returned %#lx !!", *(uint64_t *)loader_ctx.args.ret);
+  notify("elfldr returned %d !!", result);
 
   munmap(loader_ctx.base, loader_ctx.size);
-
-  remove_pktinfo_from_so(loader_ctx.args.rwpair[0]);
-
-  close(loader_ctx.args.rwpair[0]);
-  close(loader_ctx.args.rwpair[1]);
-  close(loader_ctx.args.rwpipe[0]);
-  close(loader_ctx.args.rwpipe[1]);
-
   munmap(loader_ctx.args_map, PAGE_SIZE);
+
   return 0;
 }
