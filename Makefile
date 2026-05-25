@@ -18,6 +18,7 @@ OBJS := \
   $(BUILD_DIR)/kernel.o \
   $(BUILD_DIR)/syscalls.o \
   $(BUILD_DIR)/exploit.o \
+
 all: $(BUILD_DIR)/$(BIN)
 
 $(BUILD_DIR):
